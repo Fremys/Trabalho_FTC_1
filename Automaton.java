@@ -1,24 +1,29 @@
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 
 public class Automaton {
     
     private int id;
     private ArrayList<Transition> transitionList; 
-    private ArrayList<State> stateList;
-    private ArrayList<State> finalStates; 
+    private Map<Integer, State> stateList;
+    private Map<Integer, State> finalStates;
+    private ArrayList<String> alphabet; 
 
     public Automaton(){
         this.id = -1;
         this.transitionList = null;
         this.stateList = null;
-        this.finalStates = new ArrayList<>();
+        this.finalStates = new HashMap<Integer, State>();
+        this.alphabet = new ArrayList<String>();
     }
 
-    public Automaton(int id, ArrayList<Transition> transitionList, ArrayList<State> stateList, ArrayList<State> finalStates){
+    public Automaton(int id, ArrayList<Transition> transitionList, Map<Integer, State> stateList, Map<Integer, State> finalStates, ArrayList<String> alphabet){
         this.id = id;
         this.transitionList = transitionList;
         this.stateList = stateList;
         this.finalStates = finalStates;
+        this.alphabet = alphabet;
     }
 
 
@@ -38,20 +43,28 @@ public class Automaton {
         this.transitionList = transitionList;
     }
 
-    public ArrayList<State> getStateList() {
+    public Map<Integer, State> getStateList() {
         return this.stateList;
     }
 
-    public void setStateList(ArrayList<State> stateList) {
+    public void setStateList(Map<Integer, State> stateList) {
         this.stateList = stateList;
     }
 
-    public ArrayList<State> getFinalStates(){
+    public Map<Integer, State> getFinalStates(){
         return this.finalStates;
     }
 
-    public void setFinalStates(ArrayList<State> finalStates) {
+    public void setFinalStates(Map<Integer, State> finalStates) {
         this.finalStates = finalStates;
+    }
+
+    public ArrayList<String> getAlphabet() {
+        return alphabet;
+    }
+
+    public void setAlphabet(ArrayList<String> alphabet) {
+        this.alphabet = alphabet;
     }
 
 

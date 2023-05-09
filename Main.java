@@ -6,6 +6,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Element;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.io.*;
 import java.lang.reflect.Array;
 import java.util.Map;
@@ -19,43 +20,79 @@ public class Main{
         //ler automato
         Automaton automaton = lerXml();
 
-        bloom(automaton.getStateList(), findAlphabet(automaton.getTransitionList()), automaton.getTransitionList(), findStateForId(0, automaton.getStateList()), automaton.getFinalStates());
+        bloom(automaton.getStateList(), automaton.getAlphabet(), automaton.getTransitionList(), automaton.getStateList().get(0), automaton.getFinalStates());
 
         System.out.println("end");
 
     }
 
-    public static ArrayList<State> getReachableStates(int id, ArrayList<Transition> transitions, ArrayList<State> states) {
+    public static Automaton bloom(Map<Integer, State> states, ArrayList<String> alphabet, ArrayList<Transition> transitions, State init, Map<Integer, State> finalStates){
         //Definir dados
-        ArrayList<State> result = new ArrayList<State>();
+        Automaton result = new Automaton();
 
-        for(int i = 0; i < transitions.size(); i++) {
-            if(transitions.get(i).getFrom() == id ){
-                // states.a
+        Map<Integer, State> reachableStates = getReachableStates(init.getId(), transitions, states);
+        
+        Map<Integer, State> newStates = new HashMap<Integer, State>();
+        ArrayList<Transition> newTransitions = new ArrayList<Transition>();
+
+        //Verificar casos especiais
+        if(finalStates.size() == 0){
+
+            newStates.put(init.getId(), init);
+
+            //A nova lista de transições será baseada no alfabeto
+            //criando transições apenas para o estado inicial (fazer um loop no estado inicial)
+            for(String letter : alphabet){
+                newTransitions.add(new Transition(letter, init.getId(), init.getId()));
+            }
+            
+            result = new Automaton(0, newTransitions, newStates, null, alphabet);
+
+        }else{
+            //usar o newState como variável auxiliar para verificação
+            newStates = removeStates(states, finalStates);
+
+            if(newStates.size() == 0){
+                
+            newStates.put(init.getId(), init);
+            
+            //A nova lista de transições será baseada no alfabeto
+            //criando transições apenas para o estado inicial (fazer um loop no estado inicial)
+            for(String letter : alphabet){
+                newTransitions.add(new Transition(letter, init.getId(), init.getId()));
+            }
+            
+            result = new Automaton(0, newTransitions, newStates,  newStates, alphabet);
+
             }
         }
+
+
+
+        System.out.println("end");
 
         return result;
 
     }
-
     
-    public static void bloom(ArrayList<State> states, ArrayList<String> alphabet, ArrayList<Transition> transitions, State init, ArrayList<State> finalStates){
+    public static Map<Integer, State> removeStates(Map<Integer, State> states, Map<Integer, State> removeStates){
         //Definir dados
-        
+        Map<Integer, State> result = new HashMap<Integer, State>(states);
 
-        System.out.println("end");
+        removeStates.forEach((key, value)->{
+            result.remove(key);
+        });
 
+        return result;
     }
     
-    public static State findStateForId(int id, ArrayList<State> states){
+    public static Map<Integer, State> getReachableStates(int mainState, ArrayList<Transition> transitions, Map<Integer, State> states) {
         //Definir dados
-        State result = null;
+        Map<Integer, State> result = new HashMap<Integer, State>();
 
-        for(int i = 0; i < states.size(); i++){
-            if(states.get(i).getId() == id){
-                result = states.get(i);
-                i = states.size();
+        for(int i = 0; i < transitions.size(); i++) {
+            if(transitions.get(i).getFrom() == mainState ){
+                result.put(transitions.get(i).getTo(), states.get(transitions.get(i).getTo()));
             }
         }
 
@@ -92,8 +129,9 @@ public class Main{
 
         //Definir dados  
         ArrayList<Transition> transitionList = new ArrayList<>();
-        ArrayList<State> stateList = new ArrayList<>();
-        ArrayList<State> finalStates = new ArrayList<>();
+        Map<Integer,State> stateList = new HashMap<Integer,State>();
+        Map<Integer,State> finalStates = new HashMap<Integer,State>();
+        ArrayList<String> alphabet = null;
 
         //Salvar as transições
 
@@ -126,16 +164,18 @@ public class Main{
                 Element eElement = (Element) nNode;
                 
                 boolean finish = eElement.getElementsByTagName("final").item(0) != null;
-
                 
                 State state = new State(Integer.parseInt(eElement.getAttribute("id")), eElement.getAttribute("name"), finish);
-                stateList.add(state);
+                stateList.put(state.getId(), state);
+
                 if(finish)
-                    finalStates.add(state);
+                    finalStates.put(state.getId(), state);
             }
         }
 
-        response = new Automaton(0, transitionList, stateList, finalStates);
+        alphabet = findAlphabet(transitionList);
+
+        response = new Automaton(0, transitionList, stateList, finalStates, alphabet);
 
         return response;
 
