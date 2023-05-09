@@ -27,11 +27,11 @@ public class Transition {
         this.read = read;
     }
 
-    public int getInt() {
+    public int getFrom() {
         return this.from;
     }
 
-    public void setInt(int from) {
+    public void setFrom(int from) {
         this.from = from;
     }
 
